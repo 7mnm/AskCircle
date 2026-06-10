@@ -1,0 +1,4 @@
+.DS_Store
+thumbs.db
+.system_generated/
+*.log
