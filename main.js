@@ -220,14 +220,33 @@ document.addEventListener('DOMContentLoaded', () => {
       formStatus.textContent = html.lang === 'ar' ? 'جاري إرسال طلبكم...' : 'Envoi en cours de votre demande...';
       formStatus.className = 'form-status-msg';
 
-      setTimeout(() => {
-        formStatus.textContent = html.lang === 'ar' 
-          ? 'شكراً لكم! تم إرسال طلب الحجز بنجاح. سنرد عليكم خلال 4 ساعات عمل.' 
-          : 'Merci ! Votre demande a été reçue. Nous vous répondrons sous 4 heures ouvrées.';
-        formStatus.className = 'form-status-msg success';
-        
-        contactForm.reset();
-      }, 1000);
+      // Send to Vercel serverless API function
+      fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(data)
+      })
+      .then(response => {
+        if (response.ok) {
+          formStatus.textContent = html.lang === 'ar' 
+            ? 'شكراً لكم! تم إرسال طلب الحجز بنجاح. سنرد عليكم خلال 4 ساعات عمل.' 
+            : 'Merci ! Votre demande a été reçue. Nous vous répondrons sous 4 heures ouvrées.';
+          formStatus.className = 'form-status-msg success';
+          contactForm.reset();
+        } else {
+          throw new Error('Server error during form submission');
+        }
+      })
+      .catch(error => {
+        console.error('Form submission failed:', error);
+        formStatus.textContent = html.lang === 'ar'
+          ? 'عذراً، حدث خطأ أثناء إرسال رسالتكم. يرجى المحاولة مرة أخرى.'
+          : 'Désolé, une erreur est survenue lors de l\'envoi. Veuillez réessayer.';
+        formStatus.className = 'form-status-msg error';
+      });
     });
   }
 
